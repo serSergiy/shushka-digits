@@ -177,6 +177,7 @@
   .digit-input::-webkit-outer-spin-button, .digit-input::-webkit-inner-spin-button { -webkit-appearance: none; }
   .digit-input:focus { outline: none; border-color: var(--accent); background: rgba(0,255,136,0.06); box-shadow: 0 0 0 2px rgba(0,255,136,0.15); }
   .digit-input.filled { border-color: rgba(0,255,136,0.4); }
+  .digit-input.drag-over-input { border-color: var(--accent3) !important; background: rgba(255,204,0,0.1) !important; box-shadow: 0 0 0 2px rgba(255,204,0,0.2); }
   .input-actions { display: flex; gap: 10px; justify-content: center; }
   .guess-btn {
     padding: 12px 32px;
@@ -205,6 +206,7 @@
   .result-banner-title { font-family: var(--font-display); font-size: 52px; letter-spacing: 6px; line-height: 1; }
   .result-banner-title.win  { color: var(--accent); }
   .result-banner-title.lose { color: var(--cpu); }
+  .result-banner-title.late { color: var(--accent3); }
   .result-stats { display: flex; gap: 40px; }
   .result-stat { text-align: center; font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
   .result-stat strong { display: block; font-size: 24px; letter-spacing: 5px; margin-top: 4px; font-weight: normal; }
@@ -224,6 +226,50 @@
   }
   .play-again-btn:hover { background: var(--accent); color: #000; }
 
+  /* ── DEFEAT MODAL ── */
+  .defeat-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+    animation: fadeIn 0.25s ease both;
+  }
+  .defeat-overlay.show { display: flex; }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  .defeat-modal {
+    background: var(--panel);
+    border: 1px solid var(--cpu);
+    border-radius: 16px;
+    padding: 36px 40px;
+    max-width: 420px; width: 90%;
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+    animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+    text-align: center;
+  }
+  @keyframes popIn { from { opacity:0; transform: scale(0.85); } to { opacity:1; transform: scale(1); } }
+  .defeat-modal-icon { font-size: 52px; line-height: 1; }
+  .defeat-modal-title {
+    font-family: var(--font-display); font-size: 40px; letter-spacing: 5px;
+    color: var(--cpu); line-height: 1;
+  }
+  .defeat-modal-msg { font-size: 13px; color: var(--muted); letter-spacing: 1px; line-height: 1.7; }
+  .defeat-modal-actions { display: flex; gap: 12px; width: 100%; margin-top: 4px; }
+  .defeat-continue-btn {
+    flex: 2; padding: 13px;
+    background: var(--cpu); border: none; border-radius: 8px;
+    color: #fff; font-family: var(--font-display); font-size: 20px; letter-spacing: 3px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .defeat-continue-btn:hover { background: #ff5580; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,51,102,0.35); }
+  .defeat-giveup-btn {
+    flex: 1; padding: 13px;
+    background: transparent; border: 1px solid var(--border); border-radius: 8px;
+    color: var(--muted); font-family: var(--font-mono); font-size: 13px; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .defeat-giveup-btn:hover { border-color: var(--muted); color: var(--text); }
+
   /* ── STATUS BAR ── */
   .status-bar {
     width: 100%; max-width: 900px;
@@ -234,6 +280,71 @@
   .turn-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1.2s ease infinite; }
   .turn-dot.cpu  { background: var(--cpu); }
   .turn-dot.dead { animation: none; background: var(--muted); }
+
+  /* ── NOTES PANEL ── */
+  .notes-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .notes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+  .notes-title { font-family: var(--font-display); font-size: 16px; letter-spacing: 3px; color: var(--muted); }
+  .notes-reset-btn {
+    padding: 5px 12px; background: transparent; border: 1px solid var(--border); border-radius: 6px;
+    color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .notes-reset-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+  .notes-row-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+  .notes-zone {
+    display: flex; flex-wrap: wrap; gap: 7px; align-items: center;
+    min-height: 46px; padding: 8px 10px; border-radius: 8px;
+    border: 1px dashed transparent; transition: background 0.15s, border-color 0.15s;
+  }
+  .notes-zone.drag-over { border-color: currentColor; }
+  .notes-zone-neutral { border-color: var(--border); background: rgba(255,255,255,0.02); }
+  .notes-zone-neutral.drag-over { background: rgba(255,255,255,0.05); border-color: var(--muted); }
+  .notes-zone-red { border-color: rgba(255,51,102,0.3); background: rgba(255,51,102,0.05); }
+  .notes-zone-red.drag-over { background: rgba(255,51,102,0.12); border-color: var(--cpu); }
+  .notes-zone-green { flex: 1; border-color: rgba(0,255,136,0.25); background: rgba(0,255,136,0.04); }
+  .notes-zone-green.drag-over { background: rgba(0,255,136,0.1); border-color: var(--accent); }
+  .notes-zone-guess-wrap { display: flex; gap: 10px; align-items: center; }
+  .notes-chip {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 16px; font-weight: bold;
+    cursor: grab; user-select: none;
+    transition: transform 0.12s, box-shadow 0.12s;
+    border: 2px solid transparent;
+  }
+  .notes-chip:active { cursor: grabbing; transform: scale(1.15); }
+  .notes-chip.chip-neutral {
+    background: rgba(255,255,255,0.07); border-color: var(--border); color: var(--text);
+  }
+  .notes-chip.chip-neutral:hover { border-color: var(--muted); box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+  .notes-chip.chip-elim {
+    background: rgba(255,51,102,0.15); border-color: var(--cpu); color: var(--cpu);
+  }
+  .notes-chip.chip-guess {
+    background: rgba(0,255,136,0.15); border-color: var(--accent); color: var(--accent);
+  }
+  .notes-chip.dragging { opacity: 0.35; transform: scale(0.9); }
+  /* ordered slots in green zone */
+  .notes-slot {
+    width: 36px; height: 36px; border-radius: 8px;
+    border: 1px dashed rgba(0,255,136,0.3); background: rgba(0,255,136,0.04);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: rgba(0,255,136,0.3); letter-spacing: 1px;
+    position: relative; transition: border-color 0.15s, background 0.15s;
+  }
+  .notes-slot.occupied { border-style: solid; border-color: rgba(0,255,136,0.5); background: rgba(0,255,136,0.08); }
+  .notes-slot.drag-over-slot { border-color: var(--accent); background: rgba(0,255,136,0.15); }
+  .notes-use-btn {
+    padding: 8px 18px; background: transparent; border: 1px solid var(--accent); border-radius: 8px;
+    color: var(--accent); font-family: var(--font-display); font-size: 16px; letter-spacing: 2px;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .notes-use-btn:hover { background: rgba(0,255,136,0.12); }
+  .notes-use-btn:disabled { opacity: 0.25; cursor: default; }
 
   /* ── ANIMATIONS ── */
   @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:none; } }
@@ -284,10 +395,18 @@
     <div class="setting-row">
       <div class="setting-label" data-i18n="labelBlind">Blind Mode</div>
       <div class="toggle-group" id="blind-group">
+        <button class="toggle-btn active" data-val="off" data-i18n="off">Off</button>
+        <button class="toggle-btn" data-val="on" data-i18n="on">On</button>
+      </div>
+      <div class="setting-desc" data-i18n="descBlind"><b>On</b> — your log shows only your last guess. Шушка's guesses are shown but scores hidden. Everything reveals at game end.</div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label" data-i18n="labelNotes">Notes Panel</div>
+      <div class="toggle-group" id="notes-group">
         <button class="toggle-btn" data-val="off" data-i18n="off">Off</button>
         <button class="toggle-btn active" data-val="on" data-i18n="on">On</button>
       </div>
-      <div class="setting-desc" data-i18n="descBlind"><b>On</b> — your log shows only your last guess. Шушка's guesses are shown but scores hidden. Everything reveals at game end.</div>
+      <div class="setting-desc" data-i18n="descNotes">Shows a drag-and-drop digit tracker below the guess input.</div>
     </div>
     <button class="start-btn" id="start-btn" data-i18n="btnNext">NEXT →</button>
   </div>
@@ -354,6 +473,28 @@
     </div>
   </div>
 
+  <!-- NOTES PANEL -->
+  <div id="notes-panel" style="display:none; width:100%; max-width:900px; margin-top:10px;">
+    <div class="notes-card">
+      <div class="notes-header">
+        <span class="notes-title" data-i18n="notesTitle">NOTES</span>
+        <button class="notes-reset-btn" id="notes-reset-btn" data-i18n="notesReset">↺ RESET</button>
+      </div>
+      <!-- Row 1: neutral pool -->
+      <div class="notes-row-label" data-i18n="notesPool">unknown</div>
+      <div class="notes-zone notes-zone-neutral" id="notes-pool" data-zone="pool"></div>
+      <!-- Row 2: eliminated (red) -->
+      <div class="notes-row-label" data-i18n="notesElim">not in number</div>
+      <div class="notes-zone notes-zone-red" id="notes-elim" data-zone="elim"></div>
+      <!-- Row 3: ordered guess (green) -->
+      <div class="notes-row-label" data-i18n="notesGuess">in number — ordered</div>
+      <div class="notes-zone-guess-wrap">
+        <div class="notes-zone notes-zone-green" id="notes-guess" data-zone="guess"></div>
+        <button class="notes-use-btn" id="notes-use-btn" data-i18n="notesUse">→ USE</button>
+      </div>
+    </div>
+  </div>
+
   <div class="status-bar">
     <div class="status-turn">
       <div class="turn-dot" id="turn-dot"></div>
@@ -361,6 +502,19 @@
     </div>
     <div class="your-secret-bar">
       <span data-i18n="yourSecretLabel">your secret:</span> <span class="your-secret-val" id="your-secret-display">????</span>
+    </div>
+  </div>
+</div>
+
+<!-- DEFEAT MODAL -->
+<div class="defeat-overlay" id="defeat-overlay">
+  <div class="defeat-modal">
+    <div class="defeat-modal-icon">🤖</div>
+    <div class="defeat-modal-title" id="defeat-modal-title">ШУШКА WINS</div>
+    <div class="defeat-modal-msg" id="defeat-modal-msg">Шушка cracked your number!<br>But the duel isn't over — keep guessing if you dare.</div>
+    <div class="defeat-modal-actions">
+      <button class="defeat-continue-btn" id="defeat-continue-btn">KEEP GOING</button>
+      <button class="defeat-giveup-btn" id="defeat-giveup-btn">give up</button>
     </div>
   </div>
 </div>
@@ -373,7 +527,8 @@ const CONFIG = {
   digitCount: 4,
   difficulty: 'normal',
   infoLevel:  'full',
-  blindMode:  true,
+  blindMode:  false,
+  notesMode:  true,
 };
 
 // ══════════════════════════════════════
@@ -418,10 +573,23 @@ const STRINGS = {
     btnAgain:       'PLAY AGAIN',
     youWin:         'YOU WIN',
     shushkaWins:    'ШУШКА WINS',
+    lateWin:        'TOO LATE…',
+    defeatTitle:    'SHUSHKA WINS',
+    defeatMsg:      "Shushka cracked your number!<br>But the duel isn't over — keep guessing if you dare.",
+    defeatContinue: 'KEEP GOING',
+    defeatGiveUp:   'give up',
     errFill:        'fill all digits',
     errZero:        'first digit cannot be 0',
     errUnique:      'all digits must be unique',
     langBtn:        'UA',
+    labelNotes:     'Notes Panel',
+    descNotes:      'Shows a drag-and-drop digit tracker below the guess input.',
+    notesTitle:     'NOTES',
+    notesReset:     '↺ RESET',
+    notesPool:      'unknown',
+    notesElim:      'not in number',
+    notesGuess:     'in number — ordered',
+    notesUse:       '→ USE',
   },
   ua: {
     subtitle:       'Дуель Цифр — Вгадай Швидше За Шушку',
@@ -459,10 +627,23 @@ const STRINGS = {
     btnAgain:       'ГРАТИ ЗНОВУ',
     youWin:         'ПЕРЕМОГА',
     shushkaWins:    'ШУШКА ВИГРАЛА',
+    lateWin:        'ЗАПІЗНО…',
+    defeatTitle:    'ШУШКА ВИГРАЛА',
+    defeatMsg:      'Шушка відгадала твоє число!<br>Але дуель ще не завершена — продовжуй, якщо не боїшся.',
+    defeatContinue: 'ПРОДОВЖИТИ',
+    defeatGiveUp:   'здатись',
     errFill:        'заповни всі цифри',
     errZero:        'перша цифра не може бути 0',
     errUnique:      'всі цифри мають бути різними',
     langBtn:        'EN',
+    labelNotes:     'Нотатки',
+    descNotes:      'Показує панель для відстеження цифр.',
+    notesTitle:     'НОТАТКИ',
+    notesReset:     '↺ СКИНУТИ',
+    notesPool:      'невідомо',
+    notesElim:      'немає в числі',
+    notesGuess:     'є в числі — по порядку',
+    notesUse:       '→ Використати',
   }
 };
 
@@ -471,6 +652,10 @@ function t(key) { return STRINGS[currentLang][key] ?? STRINGS.en[key] ?? key; }
 function applyLang() {
   document.getElementById('i18n-subtitle').textContent = t('subtitle');
   document.getElementById('lang-btn').textContent = t('langBtn');
+  document.getElementById('defeat-modal-title').textContent = t('defeatTitle');
+  document.getElementById('defeat-modal-msg').innerHTML = t('defeatMsg');
+  document.getElementById('defeat-continue-btn').textContent = t('defeatContinue');
+  document.getElementById('defeat-giveup-btn').textContent = t('defeatGiveUp');
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     const val = t(key);
@@ -498,6 +683,7 @@ setupToggleGroup('digits-group',     'digitCount', v => Number(v));
 setupToggleGroup('difficulty-group', 'difficulty', null);
 setupToggleGroup('info-group',       'infoLevel',  null);
 setupToggleGroup('blind-group',      'blindMode',  v => v === 'on');
+setupToggleGroup('notes-group',      'notesMode',  v => v === 'on');
 
 document.getElementById('start-btn').addEventListener('click', goToSecretSetup);
 
@@ -758,6 +944,26 @@ function buildDigitInputs() {
     inp.className = 'digit-input'; inp.dataset.idx = i;
     inp.addEventListener('input', onDigitInput);
     inp.addEventListener('keydown', onDigitKeydown);
+
+    // Drop a notes chip onto a digit input
+    inp.addEventListener('dragover', e => {
+      if (draggedDigit !== null) { e.preventDefault(); inp.classList.add('drag-over-input'); }
+    });
+    inp.addEventListener('dragleave', () => inp.classList.remove('drag-over-input'));
+    inp.addEventListener('drop', e => {
+      e.preventDefault();
+      inp.classList.remove('drag-over-input');
+      const digit = e.dataTransfer.getData('text/plain') || draggedDigit;
+      if (!digit) return;
+      // Reject if this digit is already in another input
+      const siblings = [...document.querySelectorAll('.digit-input')];
+      const alreadyUsed = siblings.filter(s => s !== inp).some(s => s.value === digit);
+      if (alreadyUsed) return;
+      inp.value = digit;
+      inp.classList.add('filled');
+      syncGuessBtn();
+    });
+
     c.appendChild(inp);
   }
 }
@@ -842,6 +1048,7 @@ function startGame(chosenSecret) {
   updateCounts();
   setTurnUI(true);
   buildDigitInputs();
+  initNotes();
 
   // Show player's secret in the status bar
   document.getElementById('your-secret-display').textContent = chosenSecret;
@@ -853,6 +1060,13 @@ function startGame(chosenSecret) {
   document.getElementById('play-again-btn').onclick = () => {
     document.getElementById('game-screen').style.display = 'none';
     document.getElementById('settings-screen').style.display = 'block';
+  };
+
+  document.getElementById('defeat-continue-btn').onclick = continueAfterDefeat;
+  document.getElementById('defeat-giveup-btn').onclick = () => {
+    hideDefeatModal();
+    rebuildYouHistory();
+    endGame('lose');
   };
 }
 
@@ -882,24 +1096,34 @@ function onPlayerGuess() {
 
   const score  = scoreGuess(guess, cpuSecret);
   const isWin  = score.correct === CONFIG.digitCount;
+  const alreadyLost = cpuGuesses.length > 0 && cpuGuesses[cpuGuesses.length - 1].score.correct === CONFIG.digitCount;
 
   playerGuesses.push({ guess, score });
 
-  if (CONFIG.blindMode && !isWin) {
+  if (isWin) {
+    // Rebuild full history with colors revealed (includes this final guess)
+    rebuildYouHistory();
+    updateCounts();
+    clearGuessInputs();
+    endGame(alreadyLost ? 'late' : 'win');
+    return;
+  }
+
+  if (CONFIG.blindMode) {
     // Blind: only show latest row, no colors
     document.getElementById('you-history').innerHTML = '';
     addHistoryRow('you-history', guess, score, { blind: false, secret: null });
   } else {
-    // Non-blind: full log visible, but no colors yet (revealed at game end)
-    addHistoryRow('you-history', guess, score, { blind: false, winner: isWin, secret: null });
+    // Non-blind: full log, no colors yet (revealed at game end)
+    addHistoryRow('you-history', guess, score, { blind: false, secret: null });
   }
 
   updateCounts();
   clearGuessInputs();
 
-  if (isWin) {
-    rebuildYouHistory(); // reveal colors for all rows (blind or not)
-    endGame('win');
+  // If CPU already won and player is continuing, don't trigger CPU turn again
+  if (alreadyLost) {
+    setTurnUI(true);
     return;
   }
 
@@ -933,12 +1157,20 @@ function doCpuTurn() {
   updateCounts();
 
   if (isWin) {
-    rebuildYouHistory(); // reveal colors regardless of blind mode
-    endGame('lose');
+    // Don't reveal colors yet - just show the defeat modal
+    showDefeatModal();
     return;
   }
 
   setTurnUI(true);
+}
+
+function showDefeatModal() {
+  document.getElementById('defeat-overlay').classList.add('show');
+}
+
+function hideDefeatModal() {
+  document.getElementById('defeat-overlay').classList.remove('show');
 }
 
 function endGame(result) {
@@ -955,19 +1187,333 @@ function endGame(result) {
   banner.classList.add('show');
 
   const titleEl = document.getElementById('result-title');
-  titleEl.textContent = result === 'win' ? t('youWin') : t('shushkaWins');
-  titleEl.className   = `result-banner-title ${result === 'win' ? 'win' : 'lose'}`;
+  titleEl.textContent = result === 'win' ? t('youWin') : result === 'late' ? t('lateWin') : t('shushkaWins');
+  titleEl.className   = `result-banner-title ${result === 'win' ? 'win' : result === 'late' ? 'late' : 'lose'}`;
 
   const yg = playerGuesses.length;
   const cg = cpuGuesses.length;
-  document.getElementById('result-you-g').textContent  = `${yg} ${yg === 1 ? t('guess1') : t('guesses')}`;
-  document.getElementById('result-cpu-g').textContent  = `${cg} ${cg === 1 ? t('guess1') : t('guesses')}`;
+  document.getElementById('result-you-g').textContent  = `${yg}`;
+  document.getElementById('result-cpu-g').textContent  = `${cg}`;
   document.getElementById('result-cpu-s').textContent  = cpuSecret;
   document.getElementById('result-your-s').textContent = playerSecret;
 
   document.getElementById('you-history').scrollTop = 99999;
   document.getElementById('cpu-history').scrollTop = 99999;
 }
+
+// Called when player is given a chance to keep guessing after defeat
+function continueAfterDefeat() {
+  hideDefeatModal();
+  gameOver = false;
+  yourTurn = true;
+
+  // Re-enable input panel
+  document.getElementById('input-panel').style.display = 'flex';
+
+  const dot = document.getElementById('turn-dot');
+  dot.className = 'turn-dot';
+  document.getElementById('turn-label').textContent  = t('yourTurn');
+  document.getElementById('status-text').textContent = t('enterGuess');
+  document.getElementById('input-panel').style.opacity = '1';
+  document.getElementById('input-panel').style.pointerEvents = 'auto';
+
+  syncGuessBtn();
+  document.querySelector('.digit-input')?.focus();
+}
+// ══════════════════════════════════════
+//  NOTES PANEL
+// ══════════════════════════════════════
+
+// State: '0'-'9' → { zone: 'pool'|'elim'|'guess', slot: number|null }
+let notesState = {};
+let draggedDigit = null;
+
+// Stable DOM references — created once per game, reused forever
+const noteChips  = {};  // digit → chip element
+const noteSlots  = [];  // index → slot element
+
+function initNotes() {
+  const panel = document.getElementById('notes-panel');
+  if (!CONFIG.notesMode) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+
+  // Reset state
+  for (let d = 0; d <= 9; d++) notesState[String(d)] = { zone: 'pool', slot: null };
+
+  // Build chips once (or reuse if already built for this digit count)
+  const pool  = document.getElementById('notes-pool');
+  const elim  = document.getElementById('notes-elim');
+  const guess = document.getElementById('notes-guess');
+
+  pool.innerHTML = '';
+  elim.innerHTML = '';
+  guess.innerHTML = '';
+  noteSlots.length = 0;
+
+  // Create 10 chips — once, with listeners attached once
+  for (let d = 0; d <= 9; d++) {
+    const digit = String(d);
+    if (!noteChips[digit]) {
+      noteChips[digit] = createChip(digit);
+    }
+    // reset class
+    noteChips[digit].className = 'notes-chip chip-neutral';
+    pool.appendChild(noteChips[digit]);
+  }
+
+  // Create N slots — once per game start
+  for (let i = 0; i < CONFIG.digitCount; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'notes-slot';
+    slot.dataset.slot = i;
+    slot.textContent = i + 1;
+    setupSlotDrop(slot, i);
+    noteSlots.push(slot);
+    guess.appendChild(slot);
+  }
+
+  // Zone drop listeners — attached once to the fixed zone elements
+  setupZoneDrop(pool,  'pool');
+  setupZoneDrop(elim,  'elim');
+  setupZoneDrop(guess, 'guess');
+
+  document.getElementById('notes-reset-btn').onclick = resetNotes;
+  document.getElementById('notes-use-btn').onclick   = useNotesGuess;
+  document.getElementById('notes-use-btn').disabled  = false;
+}
+
+function resetNotes() {
+  for (let d = 0; d <= 9; d++) notesState[String(d)] = { zone: 'pool', slot: null };
+  applyNotesState();
+}
+
+/** Move chip elements to match notesState — no innerHTML wipes, no new listeners */
+function applyNotesState() {
+  const pool  = document.getElementById('notes-pool');
+  const elim  = document.getElementById('notes-elim');
+
+  // Update chips
+  for (let d = 0; d <= 9; d++) {
+    const digit = String(d);
+    const state = notesState[digit];
+    const chip  = noteChips[digit];
+
+    if (state.zone === 'pool') {
+      chip.className = 'notes-chip chip-neutral';
+      // Insert in numeric order
+      const after = [...pool.children].find(c => Number(c.dataset.digit) > d);
+      pool.insertBefore(chip, after || null);
+    } else if (state.zone === 'elim') {
+      chip.className = 'notes-chip chip-elim';
+      const after = [...elim.children].find(c => Number(c.dataset.digit) > d);
+      elim.insertBefore(chip, after || null);
+    } else if (state.zone === 'guess') {
+      chip.className = 'notes-chip chip-guess';
+      const slot = noteSlots[state.slot];
+      if (slot) {
+        slot.textContent = '';
+        slot.classList.add('occupied');
+        slot.appendChild(chip);
+      }
+    }
+  }
+
+  // Update empty slots
+  noteSlots.forEach((slot, i) => {
+    const hasChip = Object.values(notesState).some(s => s.zone === 'guess' && s.slot === i);
+    if (!hasChip) {
+      slot.textContent = i + 1;
+      slot.className = 'notes-slot';
+    }
+  });
+}
+
+function moveDigit(digit, zone, slot = null) {
+  // Remove from old guess slot if needed
+  const old = notesState[digit];
+  if (old.zone === 'guess' && old.slot !== null) {
+    // slot will be vacated by applyNotesState
+  }
+  notesState[digit] = { zone, slot };
+  applyNotesState();
+}
+
+function createChip(digit) {
+  const chip = document.createElement('div');
+  chip.className = 'notes-chip chip-neutral';
+  chip.textContent = digit;
+  chip.draggable = true;
+  chip.dataset.digit = digit;
+
+  chip.addEventListener('dragstart', e => {
+    draggedDigit = digit;
+    chip.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', digit);
+  });
+  chip.addEventListener('dragend', () => {
+    draggedDigit = null;
+    chip.classList.remove('dragging');
+    clearDragHighlights();
+  });
+  chip.addEventListener('touchstart', onTouchStart, { passive: true });
+  chip.addEventListener('touchmove',  onTouchMove,  { passive: false });
+  chip.addEventListener('touchend',   onTouchEnd,   { passive: true });
+  return chip;
+}
+
+function setupZoneDrop(zone, zoneName) {
+  // Use named handlers stored on the element to avoid stacking listeners on re-init
+  if (zone._zoneDropBound) return;
+  zone._zoneDropBound = true;
+
+  zone.addEventListener('dragover', e => {
+    if (draggedDigit === null) return;
+    e.preventDefault();
+    zone.classList.add('drag-over');
+  });
+  zone.addEventListener('dragleave', e => {
+    if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+  });
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const digit = e.dataTransfer.getData('text/plain') || draggedDigit;
+    if (!digit) return;
+
+    if (zoneName === 'pool' || zoneName === 'elim') {
+      moveDigit(digit, zoneName);
+    } else if (zoneName === 'guess') {
+      if (notesState[digit].zone === 'guess') return; // already placed in a slot
+      const free = getFreeSlot();
+      if (free !== -1) moveDigit(digit, 'guess', free);
+    }
+  });
+}
+
+function setupSlotDrop(slot, index) {
+  slot.addEventListener('dragover', e => {
+    if (draggedDigit === null) return;
+    e.preventDefault();
+    slot.classList.add('drag-over-slot');
+  });
+  slot.addEventListener('dragleave', e => {
+    if (!slot.contains(e.relatedTarget)) slot.classList.remove('drag-over-slot');
+  });
+  slot.addEventListener('drop', e => {
+    e.preventDefault();
+    slot.classList.remove('drag-over-slot');
+    const digit = e.dataTransfer.getData('text/plain') || draggedDigit;
+    if (!digit) return;
+    // Bump displaced digit back to pool
+    const displaced = Object.entries(notesState).find(([d, s]) => s.zone === 'guess' && s.slot === index);
+    if (displaced && displaced[0] !== digit) notesState[displaced[0]] = { zone: 'pool', slot: null };
+    notesState[digit] = { zone: 'guess', slot: index };
+    applyNotesState();
+  });
+}
+
+function getFreeSlot() {
+  const used = new Set(Object.values(notesState).filter(s => s.zone === 'guess').map(s => s.slot));
+  for (let i = 0; i < CONFIG.digitCount; i++) if (!used.has(i)) return i;
+  return -1;
+}
+
+function clearDragHighlights() {
+  document.querySelectorAll('.drag-over, .drag-over-slot, .drag-over-input')
+    .forEach(el => el.classList.remove('drag-over', 'drag-over-slot', 'drag-over-input'));
+}
+
+function useNotesGuess() {
+  const slotDigits = Array(CONFIG.digitCount).fill(null);
+  Object.entries(notesState).forEach(([d, s]) => {
+    if (s.zone === 'guess' && s.slot >= 0 && s.slot < CONFIG.digitCount) slotDigits[s.slot] = d;
+  });
+  const inputs = [...document.querySelectorAll('.digit-input')];
+  slotDigits.forEach((d, i) => {
+    if (!d) return;
+    inputs[i].value = d;
+    inputs[i].classList.add('filled');
+  });
+  syncGuessBtn();
+  const firstEmpty = inputs.find(inp => !inp.value);
+  (firstEmpty || inputs[inputs.length - 1])?.focus();
+}
+
+// ── Touch drag ──
+let touchChip = null, touchClone = null;
+
+function onTouchStart(e) {
+  touchChip = e.currentTarget;
+  draggedDigit = touchChip.dataset.digit;
+  touchClone = document.createElement('div');
+  touchClone.className = touchChip.className;
+  touchClone.textContent = touchChip.textContent;
+  touchClone.style.cssText = 'position:fixed;pointer-events:none;opacity:0.85;z-index:9999;transform:scale(1.2);transition:none;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:16px;font-weight:bold;';
+  document.body.appendChild(touchClone);
+  const t = e.touches[0];
+  touchClone.style.left = (t.clientX - 18) + 'px';
+  touchClone.style.top  = (t.clientY - 18) + 'px';
+}
+
+function onTouchMove(e) {
+  e.preventDefault();
+  if (!touchClone) return;
+  const t = e.touches[0];
+  touchClone.style.left = (t.clientX - 18) + 'px';
+  touchClone.style.top  = (t.clientY - 18) + 'px';
+  clearDragHighlights();
+  touchClone.style.display = 'none';
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  touchClone.style.display = '';
+  if (!el) return;
+  const digitInput = el.closest('.digit-input');
+  const slot = el.closest('.notes-slot');
+  const zone = el.closest('.notes-zone');
+  if (digitInput) digitInput.classList.add('drag-over-input');
+  else if (slot)  slot.classList.add('drag-over-slot');
+  else if (zone)  zone.classList.add('drag-over');
+}
+
+function onTouchEnd(e) {
+  if (touchClone) { touchClone.remove(); touchClone = null; }
+  clearDragHighlights();
+  const t = e.changedTouches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const digit = draggedDigit;
+  draggedDigit = null;
+  if (!el || !digit) return;
+
+  const digitInput = el.closest('.digit-input');
+  if (digitInput) {
+    const others = [...document.querySelectorAll('.digit-input')].filter(s => s !== digitInput);
+    if (!others.some(s => s.value === digit)) {
+      digitInput.value = digit; digitInput.classList.add('filled'); syncGuessBtn();
+    }
+    return;
+  }
+  const slot = el.closest('.notes-slot');
+  if (slot) {
+    const index = parseInt(slot.dataset.slot);
+    const displaced = Object.entries(notesState).find(([d, s]) => s.zone === 'guess' && s.slot === index);
+    if (displaced && displaced[0] !== digit) notesState[displaced[0]] = { zone: 'pool', slot: null };
+    notesState[digit] = { zone: 'guess', slot: index };
+    applyNotesState(); return;
+  }
+  const zone = el.closest('.notes-zone');
+  if (!zone) return;
+  const zoneName = zone.dataset.zone;
+  if (zoneName === 'pool' || zoneName === 'elim') {
+    moveDigit(digit, zoneName);
+  } else if (zoneName === 'guess') {
+    if (notesState[digit].zone !== 'guess') {
+      const free = getFreeSlot();
+      if (free !== -1) moveDigit(digit, 'guess', free);
+    }
+  }
+}
+
 </script>
+
 </body>
 </html>
