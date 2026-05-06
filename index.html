@@ -397,6 +397,109 @@
   }
   .notes-chip.locked .lock-icon { display: flex; }
 
+  /* ── STATS PANEL ── */
+  #stats-screen {
+    width: 100%; max-width: 460px;
+    animation: fadeUp 0.4s ease both 0.1s;
+    margin-bottom: 8px;
+  }
+  .stats-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden;
+  }
+  .stats-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+  }
+  .stats-header:hover { background: rgba(255,255,255,0.02); }
+  .stats-title {
+    font-family: var(--font-display); font-size: 17px; letter-spacing: 3px; color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .stats-badge {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px;
+    background: rgba(0,255,136,0.12); color: var(--accent);
+    border: 1px solid rgba(0,255,136,0.25); border-radius: 10px;
+    padding: 1px 8px;
+  }
+  .stats-chevron {
+    color: var(--muted); font-size: 12px; transition: transform 0.2s;
+  }
+  .stats-chevron.open { transform: rotate(180deg); }
+  .stats-body { display: none; padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+  .stats-body.collapsed { display: none; }
+
+  .stats-kpis {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .kpi-row {
+    display: grid; grid-template-columns: 80px 1fr 1fr 1fr; gap: 8px; align-items: center;
+  }
+  .kpi-row-label {
+    font-size: 10px; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase;
+  }
+  .kpi {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 6px; text-align: center;
+  }
+  .kpi-val {
+    font-family: var(--font-display); font-size: 20px; letter-spacing: 2px; line-height: 1;
+  }
+  .kpi-val.win-col  { color: var(--accent); }
+  .kpi-val.lose-col { color: var(--cpu); }
+  .kpi-val.late-col { color: var(--accent3); }
+  .kpi-val.neu-col  { color: var(--text); }
+  .kpi-lbl { font-size: 9px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-top: 3px; }
+  @media (max-width: 400px) {
+    .kpi-row { grid-template-columns: 56px 1fr 1fr 1fr; }
+  }
+
+  .stats-filters {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .sf-btn {
+    padding: 5px 11px; background: transparent; border: 1px solid var(--border); border-radius: 5px;
+    color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.12s;
+  }
+  .sf-btn:hover  { border-color: var(--muted); color: var(--text); }
+  .sf-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,255,136,0.08); }
+  .sf-sep { width: 1px; background: var(--border); align-self: stretch; margin: 0 2px; }
+
+  .stats-table-wrap { overflow-x: auto; }
+  .stats-table {
+    width: 100%; border-collapse: collapse; font-size: 11px;
+  }
+  .stats-table th {
+    text-align: left; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 0 6px 8px; font-weight: normal; white-space: nowrap;
+  }
+  .stats-table td {
+    padding: 7px 6px; border-top: 1px solid rgba(255,255,255,0.04);
+    letter-spacing: 0.5px; white-space: nowrap;
+  }
+  .stats-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .st-win  { color: var(--accent); }
+  .st-lose { color: var(--cpu); }
+  .st-late { color: var(--accent3); }
+  .st-muted { color: var(--muted); }
+  .st-diff-easy   { color: #88ccff; }
+  .st-diff-normal { color: var(--accent3); }
+  .st-diff-hard   { color: var(--cpu); }
+
+  .stats-empty {
+    text-align: center; color: var(--muted); font-size: 12px;
+    letter-spacing: 1px; padding: 20px 0;
+  }
+  .stats-clear-btn {
+    align-self: flex-end;
+    padding: 5px 12px; background: transparent; border: 1px solid var(--border); border-radius: 6px;
+    color: var(--muted); font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.12s;
+  }
+  .stats-clear-btn:hover { border-color: var(--cpu); color: var(--cpu); }
+
   /* ── ANIMATIONS ── */
   @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:none; } }
   @keyframes fadeUp   { from { opacity:0; transform:translateY(16px);  } to { opacity:1; transform:none; } }
@@ -414,6 +517,41 @@
   </div>
   <p id="i18n-subtitle">Number Duel — Guess Before The Machine Does</p>
 </header>
+
+<!-- STATS -->
+<div id="stats-screen">
+  <div class="stats-card">
+    <div class="stats-header" id="stats-toggle" onclick="toggleStatsPanel()">
+      <div class="stats-title">
+        <span>STATS</span>
+        <span class="stats-badge" id="stats-badge">0</span>
+      </div>
+      <span class="stats-chevron" id="stats-chevron">▼</span>
+    </div>
+    <div class="stats-body collapsed" id="stats-body">
+      <div class="stats-kpis" id="stats-kpis"></div>
+      <div class="stats-filters" id="stats-filters"></div>
+      <div class="stats-table-wrap">
+        <table class="stats-table" id="stats-table">
+          <thead>
+            <tr>
+              <th data-i18n="stDate">Date</th>
+              <th data-i18n="stResult">Result</th>
+              <th data-i18n="stDigits">#</th>
+              <th data-i18n="stDiff">Diff</th>
+              <th data-i18n="stYouG">You</th>
+              <th data-i18n="stCpuG">Шушка</th>
+              <th data-i18n="stDur">Time</th>
+            </tr>
+          </thead>
+          <tbody id="stats-tbody"></tbody>
+        </table>
+        <div class="stats-empty" id="stats-empty" style="display:none" data-i18n="stEmpty">No matches yet</div>
+      </div>
+      <button class="stats-clear-btn" id="stats-clear-btn" data-i18n="stClear">✕ clear history</button>
+    </div>
+  </div>
+</div>
 
 <!-- SETTINGS -->
 <div id="settings-screen">
@@ -643,6 +781,26 @@ const STRINGS = {
     notesElim:      'not in number',
     notesGuess:     'in number — ordered',
     notesUse:       '→ USE',
+    stDate:         'Date',
+    stResult:       'Result',
+    stDigits:       '#',
+    stDiff:         'Diff',
+    stYouG:         'You',
+    stCpuG:         'Шушка',
+    stDur:          'Time',
+    stEmpty:        'No matches yet',
+    stClear:        '✕ clear history',
+    stWin:          'WIN',
+    stLose:         'LOSE',
+    stLate:         'LATE',
+    stWins:         'Wins',
+    stLosses:       'Losses',
+    stAvgGuesses:   'Avg Guesses',
+    stShushkaAvg:   'Шушка Avg',
+    stAll:          'All',
+    stCount:        'Count',
+    stAvgYou:       'Avg You',
+    stAvgCpu:       'Avg Шушка',
   },
   ua: {
     subtitle:       'Дуель Цифр — Вгадай Швидше За Шушку',
@@ -697,6 +855,26 @@ const STRINGS = {
     notesElim:      'немає в числі',
     notesGuess:     'є в числі — по порядку',
     notesUse:       '→ Використати',
+    stDate:         'Дата',
+    stResult:       'Результат',
+    stDigits:       '#',
+    stDiff:         'Склад.',
+    stYouG:         'Ти',
+    stCpuG:         'Шушка',
+    stDur:          'Час',
+    stEmpty:        'Ще немає партій',
+    stClear:        '✕ очистити',
+    stWin:          'ПЕРЕМ',
+    stLose:         'ПОРАЗКА',
+    stLate:         'ЗАПІЗНО',
+    stWins:         'Перемоги',
+    stLosses:       'Поразки',
+    stAvgGuesses:   'Сер. спроб',
+    stShushkaAvg:   'Сер. Шушки',
+    stAll:          'Всі',
+    stCount:        'Кількість',
+    stAvgYou:       'Сер. Ти',
+    stAvgCpu:       'Сер. Шушка',
   }
 };
 
@@ -774,6 +952,7 @@ function validateSecret(s, n) {
 // ══════════════════════════════════════
 function goToSecretSetup() {
   document.getElementById('settings-screen').style.display = 'none';
+  document.getElementById('stats-screen').style.display = 'none';
   document.getElementById('secret-screen').style.display = 'block';
   buildSecretInputs();
 }
@@ -1092,6 +1271,7 @@ function startGame(chosenSecret) {
   cpuGuesses    = [];
   gameOver      = false;
   yourTurn      = true;
+  gameStartTime = Date.now();
 
   document.getElementById('you-history').innerHTML = '';
   document.getElementById('cpu-history').innerHTML = '';
@@ -1113,6 +1293,8 @@ function startGame(chosenSecret) {
   document.getElementById('play-again-btn').onclick = () => {
     document.getElementById('game-screen').style.display = 'none';
     document.getElementById('settings-screen').style.display = 'block';
+    document.getElementById('stats-screen').style.display = 'block';
+    refreshStatsUI();
   };
 
   document.getElementById('defeat-continue-btn').onclick = continueAfterDefeat;
@@ -1252,6 +1434,8 @@ function endGame(result) {
 
   document.getElementById('you-history').scrollTop = 99999;
   document.getElementById('cpu-history').scrollTop = 99999;
+
+  recordMatch(result);
 }
 
 // Called when player is given a chance to keep guessing after defeat
@@ -1648,6 +1832,202 @@ function onTouchEnd(e) {
     }
   }
 }
+
+// ══════════════════════════════════════
+//  STATISTICS
+// ══════════════════════════════════════
+const STATS_KEY   = 'digits_stats_v1';
+const STATS_LIMIT = 200; // max stored matches
+
+let statsFilter = { digits: 'all', diff: 'all', result: 'all' };
+let statsPanelOpen = false;
+let gameStartTime  = 0;
+
+function loadStats() {
+  try { return JSON.parse(localStorage.getItem(STATS_KEY)) || []; }
+  catch { return []; }
+}
+
+function saveStats(list) {
+  try { localStorage.setItem(STATS_KEY, JSON.stringify(list.slice(-STATS_LIMIT))); }
+  catch {}
+}
+
+function recordMatch(result) {
+  const duration = gameStartTime ? Math.round((Date.now() - gameStartTime) / 1000) : 0;
+  const entry = {
+    ts:         Date.now(),
+    result,                           // 'win' | 'lose' | 'late'
+    digits:     CONFIG.digitCount,
+    difficulty: CONFIG.difficulty,
+    infoLevel:  CONFIG.infoLevel,
+    blindMode:  CONFIG.blindMode,
+    playerGuesses: playerGuesses.length,
+    cpuGuesses:    cpuGuesses.length,
+    duration,
+  };
+  const list = loadStats();
+  list.push(entry);
+  saveStats(list);
+  refreshStatsUI();
+}
+
+function toggleStatsPanel() {
+  statsPanelOpen = !statsPanelOpen;
+  const body    = document.getElementById('stats-body');
+  const chevron = document.getElementById('stats-chevron');
+  body.classList.toggle('collapsed', !statsPanelOpen);
+  chevron.classList.toggle('open', statsPanelOpen);
+  if (statsPanelOpen) renderStatsBody();
+}
+
+function refreshStatsUI() {
+  const all = loadStats();
+  document.getElementById('stats-badge').textContent = all.length;
+  if (statsPanelOpen) renderStatsBody();
+}
+
+function filteredStats() {
+  return loadStats().filter(e => {
+    if (statsFilter.digits !== 'all' && e.digits !== Number(statsFilter.digits)) return false;
+    if (statsFilter.diff   !== 'all' && e.difficulty !== statsFilter.diff)       return false;
+    if (statsFilter.result !== 'all' && e.result     !== statsFilter.result)     return false;
+    return true;
+  });
+}
+
+function fmtDuration(s) {
+  if (!s) return '—';
+  if (s < 60) return `${s}s`;
+  return `${Math.floor(s/60)}m${String(s%60).padStart(2,'0')}s`;
+}
+
+function fmtDate(ts) {
+  const d = new Date(ts);
+  const mo = String(d.getMonth()+1).padStart(2,'0');
+  const dy = String(d.getDate()).padStart(2,'0');
+  const hr = String(d.getHours()).padStart(2,'0');
+  const mn = String(d.getMinutes()).padStart(2,'0');
+  return `${dy}.${mo} ${hr}:${mn}`;
+}
+
+function renderStatsBody() {
+  const all      = loadStats();
+  const filtered = filteredStats();
+
+  // ── KPIs — one row per result type ──
+  function avg(arr, key) {
+    if (!arr.length) return '—';
+    return (arr.reduce((s,e) => s + e[key], 0) / arr.length).toFixed(1);
+  }
+  const wins  = filtered.filter(e => e.result === 'win');
+  const loses = filtered.filter(e => e.result === 'lose');
+  const lates = filtered.filter(e => e.result === 'late');
+
+  document.getElementById('stats-kpis').innerHTML = `
+    <div class="kpi-row">
+      <div class="kpi-row-label"></div>
+      <div class="kpi"><div class="kpi-lbl">${t('stCount')}</div></div>
+      <div class="kpi"><div class="kpi-lbl">${t('stAvgYou')}</div></div>
+      <div class="kpi"><div class="kpi-lbl">${t('stAvgCpu')}</div></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-row-label st-win">${t('stWin')}</div>
+      <div class="kpi"><div class="kpi-val win-col">${wins.length}</div></div>
+      <div class="kpi"><div class="kpi-val neu-col">${avg(wins,  'playerGuesses')}</div></div>
+      <div class="kpi"><div class="kpi-val neu-col">${avg(wins,  'cpuGuesses')}</div></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-row-label st-lose">${t('stLose')}</div>
+      <div class="kpi"><div class="kpi-val lose-col">${loses.length}</div></div>
+      <div class="kpi"><div class="kpi-val neu-col">${avg(loses, 'playerGuesses')}</div></div>
+      <div class="kpi"><div class="kpi-val neu-col">${avg(loses, 'cpuGuesses')}</div></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-row-label st-late">${t('stLate')}</div>
+      <div class="kpi"><div class="kpi-val late-col">${lates.length}</div></div>
+      <div class="kpi"><div class="kpi-val neu-col">${avg(lates, 'playerGuesses')}</div></div>
+      <div class="kpi"><div class="kpi-val neu-col">${avg(lates, 'cpuGuesses')}</div></div>
+    </div>
+  `;
+
+  // ── Filters: digits | diff | result ──
+  const allDigits = [...new Set(all.map(e => e.digits))].sort();
+  const allDiffs  = [...new Set(all.map(e => e.difficulty))];
+  const diffOrder = { easy: 0, normal: 1, hard: 2 };
+  allDiffs.sort((a,b) => (diffOrder[a]||0) - (diffOrder[b]||0));
+
+  let filHtml = '';
+
+  // digits row
+  filHtml += `<button class="sf-btn ${statsFilter.digits==='all'?'active':''}" onclick="setStatsFilter('digits','all')">${t('stAll')}</button>`;
+  allDigits.forEach(d => {
+    filHtml += `<button class="sf-btn ${statsFilter.digits==d?'active':''}" onclick="setStatsFilter('digits','${d}')">${d}</button>`;
+  });
+
+  filHtml += `<div class="sf-sep"></div>`;
+
+  // difficulty row
+  filHtml += `<button class="sf-btn ${statsFilter.diff==='all'?'active':''}" onclick="setStatsFilter('diff','all')">${t('stAll')}</button>`;
+  allDiffs.forEach(d => {
+    filHtml += `<button class="sf-btn ${statsFilter.diff===d?'active':''}" onclick="setStatsFilter('diff','${d}')">${t(d)}</button>`;
+  });
+
+  filHtml += `<div class="sf-sep"></div>`;
+
+  // result row
+  filHtml += `<button class="sf-btn ${statsFilter.result==='all'?'active':''}" onclick="setStatsFilter('result','all')">${t('stAll')}</button>`;
+  [['win','st-win','stWin'],['lose','st-lose','stLose'],['late','st-late','stLate']].forEach(([val, cls, key]) => {
+    filHtml += `<button class="sf-btn ${cls} ${statsFilter.result===val?'active':''}" onclick="setStatsFilter('result','${val}')">${t(key)}</button>`;
+  });
+
+  document.getElementById('stats-filters').innerHTML = filHtml;
+
+  // ── Table ──
+  const tbody  = document.getElementById('stats-tbody');
+  const empty  = document.getElementById('stats-empty');
+  const recent = [...filtered].reverse().slice(0, 50);
+
+  if (!recent.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    const resultLabel = r =>
+      r === 'win'  ? `<span class="st-win">${t('stWin')}</span>`  :
+      r === 'lose' ? `<span class="st-lose">${t('stLose')}</span>` :
+                     `<span class="st-late">${t('stLate')}</span>`;
+    const diffClass = d =>
+      d === 'easy' ? 'st-diff-easy' : d === 'hard' ? 'st-diff-hard' : 'st-diff-normal';
+
+    tbody.innerHTML = recent.map(e => `
+      <tr>
+        <td class="st-muted">${fmtDate(e.ts)}</td>
+        <td>${resultLabel(e.result)}</td>
+        <td class="st-muted">${e.digits}</td>
+        <td class="${diffClass(e.difficulty)}">${t(e.difficulty).slice(0,4)}</td>
+        <td>${e.playerGuesses}</td>
+        <td>${e.cpuGuesses}</td>
+        <td class="st-muted">${fmtDuration(e.duration)}</td>
+      </tr>`).join('');
+  }
+}
+
+function setStatsFilter(key, val) {
+  statsFilter[key] = val;
+  renderStatsBody();
+}
+
+document.getElementById('stats-clear-btn').addEventListener('click', () => {
+  if (!confirm('Clear all match history?')) return;
+  localStorage.removeItem(STATS_KEY);
+  statsFilter = { digits: 'all', diff: 'all', result: 'all' };
+  refreshStatsUI();
+  renderStatsBody();
+});
+
+// init badge on load
+refreshStatsUI();
 
 </script>
 
